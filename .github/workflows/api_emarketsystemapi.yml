@@ -25,9 +25,12 @@ jobs:
         run: |
           cd API
           npm install
+          ls -l
 
       - name: Zip artifact for deployment
-        run: zip release.zip ./* -r
+        run: |
+              ls -l
+              zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
