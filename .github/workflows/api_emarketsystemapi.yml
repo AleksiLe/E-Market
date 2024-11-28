@@ -28,7 +28,9 @@ jobs:
 
       - name: Zip artifact for deployment
         run: |
+          	ls -a
           cd API
+          ls -a
           zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
