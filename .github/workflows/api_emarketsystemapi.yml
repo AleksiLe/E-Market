@@ -6,7 +6,7 @@ name: Build and deploy Node.js app to Azure Web App - EMarketSystemAPI
 on:
   push:
     branches:
-      - API
+      - Main
   workflow_dispatch:
 
 jobs:
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     environment:
-      name: 'Production'
+      name: 'API EMarketSystemAPI'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
