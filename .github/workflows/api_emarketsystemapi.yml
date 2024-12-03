@@ -29,11 +29,12 @@ jobs:
       - name: Zip artifact for deployment
         run: |
           cd API
-          zip release.zip . -r
+          zip release.zip ./* -r
+          mv release.zip ../
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
-        with:
+        with: 
           name: node-app
           path: release.zip
 
