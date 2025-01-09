@@ -1,5 +1,6 @@
 "use client"
 import ProductCard from '../../components/productCard.jsx';
+import LoadingAnimation from '../../components/loadingAnimation.jsx';
 import { useEffect, useState } from 'react';
 import getProducts from '../../services/getProducts.js';
 
@@ -11,16 +12,19 @@ export default function ProductWindow(props) {
         if (isMounted) {
             return;
         } else {
-            getProducts().then(setProducts);
+            getProducts()
+                .then(setProducts)
+                .catch(console.error);
             setIsMounted(true);
         }
     }, [isMounted]);
         
     return (
         <div className='flex flex-wrap'>
-            {products && products.map((product) => (
+            {products ? products.map((product) => (
                 <ProductCard key={product._id} name={product.name} description={product.description} />
-            ))}
+            )) :
+            <LoadingAnimation />}
         </div>
     );
 }

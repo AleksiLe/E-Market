@@ -6,31 +6,31 @@ import Hyperlink from '@/components/navbar/hyperlink'
 export default function Navbar() {
     //console.log(usePathname())
     return (
-        <nav className="bg-white bg-gray-200 dark:bg-gray-900">
-        <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        {/* <a href="https://flowbite.com/" className="flex items-center space-x-3 rtl:space-x-reverse">
-            <img src="https://flowbite.com/docs/images/logo.svg" className="h-8" alt="Flowbite Logo" />
-            <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Flowbite</span>
-        </a> */}
-          <ul className="flex font-medium p-0 space-x-8 rtl:space-x-reverse flex-row mt-0 border-0 bg-whit dark:bg-gray-900">
-            <li>
-              <Hyperlink path={usePathname()} address="/" text="Home" />
-            </li>
-            <li>
-              <Hyperlink path={usePathname()} address="/products" text="Products" />
-            </li>
-          </ul>
-        <div className="items-center justify-between hidden w-full sm:flex sm:w-auto sm:order-1" id="navbar-user">
-          <ul className="flex font-medium p-0 space-x-8 rtl:space-x-reverse flex-row mt-0 border-0 bg-whit dark:bg-gray-900">
-            <li>
-              <Hyperlink path={usePathname()} address="/about" text="About" />
-            </li>
-            <li>
-              <Hyperlink path={usePathname()} address="/contact" text="Contact" />
-            </li>
-          </ul>
-        </div>
-        </div>
+        <nav className="bg-gray-200 dark:bg-gray-900">
+          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+          {/* <a href="https://flowbite.com/" className="flex items-center space-x-3 rtl:space-x-reverse">
+              <img src="https://flowbite.com/docs/images/logo.svg" className="h-8" alt="Flowbite Logo" />
+              <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Flowbite</span>
+          </a> */}
+            <ul className="flex font-medium p-0 space-x-8 rtl:space-x-reverse flex-row mt-0 border-0 bg-whit dark:bg-gray-900">
+              <li>
+                <Hyperlink path={usePathname()} address="/" text="Home" />
+              </li>
+              <li>
+                <Hyperlink path={usePathname()} address="/products" text="Products" />
+              </li>
+            </ul>
+            <div className="items-center justify-between hidden w-full sm:flex sm:w-auto sm:order-1" id="navbar-user">
+            <ul className="flex font-medium p-0 space-x-8 rtl:space-x-reverse flex-row mt-0 border-0 bg-whit dark:bg-gray-900">
+              <li>
+                <Hyperlink path={usePathname()} address="/about" text="About" />
+              </li>
+              <li>
+                <Hyperlink path={usePathname()} address="/contact" text="Contact" />
+              </li>
+            </ul>
+            </div>
+          </div>
       </nav>  
     );
 }
