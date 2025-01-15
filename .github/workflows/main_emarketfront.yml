@@ -23,13 +23,20 @@ jobs:
 
       - name: npm install
         run: |
-          cd API
+          cd front/app
           npm install
+
+      - name: Build the app
+        run: |
+          cd front/app
+          npm run build
+
       - name: Zip artifact for deployment
         run: |
-          cd API
+          cd front/app
           zip release.zip ./* -r
           mv release.zip ../
+          
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with: 
