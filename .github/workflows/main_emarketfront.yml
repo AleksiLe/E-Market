@@ -75,5 +75,4 @@ jobs:
           app-name: 'EMarketFront'
           slot-name: 'Production'
           package: .
-
           
