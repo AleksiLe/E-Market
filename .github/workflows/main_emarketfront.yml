@@ -30,11 +30,12 @@ jobs:
         run: |
           cd front/app
           npm run build
+          ls -a
 
       - name: Zip artifact for deployment
         run: |
           cd front/app
-          zip release.zip ./* -r
+          zip -r release.zip ./*
           mv release.zip ../../
           
       - name: Upload artifact for deployment job
