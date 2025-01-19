@@ -11,5 +11,3 @@ const validatePassword = body("password").isStrongPassword({
 });
 
 module.exports = { validateEmail, validatePassword };
-
-//All ts files converted to js files and add other necessary changes from: https://github.com/AleksiLe/AdvancedWebApplications/blob/main/Project/Server/auth/validateToken.ts
