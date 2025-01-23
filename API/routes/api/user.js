@@ -69,7 +69,7 @@ try {
     };
     const token = jwt.sign(
         jwtPayload,
-        process.env.SECRET,
+        process.env.JWT_SECRET,
         {
         expiresIn: "1h",
         }

@@ -5,7 +5,7 @@ passport.initialize();
 
 const jwtStrategyOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
+  secretOrKey: process.env.JWT_SECRET || "Secret",
 };
 
 const jwtStrategy = new Strategy(jwtStrategyOptions, async (payload, done) => {
