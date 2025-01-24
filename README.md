@@ -1,7 +1,6 @@
 # E-Market
 Web marketplace with its own mobile app, website, and an Azure-hosted backend.
 <br>URL: https://emarketfront-eyepc4h9h8c2bmft.northeurope-01.azurewebsites.net/
-Currently, API is down because passport is misconfigured for azure. WIP
 ## Roadmap
 
 ### Version 0.3 Users
