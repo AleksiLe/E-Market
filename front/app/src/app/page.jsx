@@ -25,7 +25,7 @@ export default function Home() {
     };
 
     return (
-        <div className="p-40">
+        <div className="p-10 sm:p-40">
             <h1 className="text-4xl m-2 font-bold text-center">Shopping made simple for everyone</h1>
             <p className="text-lg m-2 text-center">Welcome to the E-Market</p>
             <div className="flex justify-center">
