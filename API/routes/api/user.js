@@ -89,7 +89,7 @@ router.post("/verify", validateToken, (req, res) => {
       return res.json({ success: true });
     } catch (error) {
       console.log(`Error during user verification: ${error}`);
-      return res.json({ failure: "User not authenticated" });
+      return res.json({ success: false, message: error });
     }
 });
 
