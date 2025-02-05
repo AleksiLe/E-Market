@@ -86,7 +86,6 @@ try {
 // post /api/user/change_email - Change user email
 router.post("/change_email", validateToken, async (req, res) => {
     try {
-        console.log(req);
         const newEmail = req.body.newEmail;
         //Check if the new email is already in use
         const existingUser = await User.findOne({ email: newEmail });
@@ -107,7 +106,6 @@ router.post("/change_email", validateToken, async (req, res) => {
 // post /api/user/change_password - Change user password
 router.post("/change_password", validateToken, async (req, res) => {
     try {
-        console.log(req);
         const newPassword = req.body.newPassword;
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(newPassword, salt);
