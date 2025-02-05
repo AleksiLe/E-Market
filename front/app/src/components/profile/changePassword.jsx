@@ -54,7 +54,7 @@ export default function ChangePassword({ onClose }) {
                 </div>
                 <div className="mb-4">
                     <label className="block dark:text-white text-black text-sm font-bold mb-2" htmlFor="confirm-password">
-                        Conmfirm New Password
+                        Confirm New Password
                     </label>
                     <input
                         type="password"
