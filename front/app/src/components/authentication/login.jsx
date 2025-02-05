@@ -2,15 +2,17 @@
 
 import postLogin from "@/services/postLogin";
 import { useState } from 'react';
+import { useToken } from '@/context/tokenContext';
 export default function Login({ onClose, onRegisterClick }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-
+    const { checkToken } = useToken();
     const handleSubmit = async (e) => {
         e.preventDefault();
         const data = await postLogin(email, password)
         if (data.success) {
             localStorage.setItem('token', data.token);
+            checkToken();
             onClose();
         } else {
             alert(data.message);

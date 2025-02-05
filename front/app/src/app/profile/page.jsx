@@ -1,21 +1,18 @@
 'use client'
-import validateToken from "@/services/validateToken"
 import { useState, useEffect } from 'react'
 import ChangePassword from '../../components/profile/changePassword'
 import ChangeEmail from '../../components/profile/changeEmail'
-export default function Profile() {
+import { useToken } from '@/context/tokenContext'
 
+export default function Profile() {
+    const { isTokenValid, checkToken } = useToken();
     useEffect(() => {
-        const token = window.localStorage.getItem('token');
-        if (token) {
-            validateToken(token).then((result) => {
-                if (!result) {
-                    window.localStorage.removeItem('token');
-                    window.location.href = '/';
-                }
-            });
+        checkToken();
+        if (!isTokenValid) {
+            window.location.href = '/';
         }
-    }, []);
+    }, [isTokenValid]);
+
     const [showChangePasswordPopup, setShowChangePasswordPopup] = useState(false);
     const [showChangeEmailPopup, setShowChangeEmailPopup] = useState(false);
 
@@ -35,6 +32,11 @@ export default function Profile() {
         setShowChangePasswordPopup(false);
     };
 
+    const handleLogOutClick = () => {
+        window.localStorage.removeItem('token');
+        window.location.href = '/';
+    };
+
 
     return(
         <div className="p-10 sm:p-40">
@@ -52,6 +54,11 @@ export default function Profile() {
                         onClick={handleChangeEmailClick}
                         className="bg-blue-500 hover:bg-blue-700 text-black dark:text-white font-bold py-2 px-4 rounded-full m-2">
                         Change Email
+                    </button>
+                    <button
+                        onClick={handleLogOutClick}
+                        className="bg-blue-500 hover:bg-blue-700 text-black dark:text-white font-bold py-2 px-4 rounded-full m-2">
+                        Log Out
                     </button>
                 </div>
             </div>

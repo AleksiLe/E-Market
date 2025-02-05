@@ -1,27 +1,20 @@
 'use client';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Hyperlink from '@/components/navbar/hyperlink';
 import Login from '@/components/authentication/login';
 import Register from '@/components/authentication/register';
-import validateToken from '@/services/validateToken';
+import { useToken } from '@/context/tokenContext';
 
 export default function Navbar() {
     const pathname = usePathname(); // Call usePathname unconditionally
     const [showLoginPopup, setShowLoginPopup] = useState(false);
     const [showRegisterPopup, setShowRegisterPopup] = useState(false);
-    const [isTokenValid, setIsTokenValid] = useState(false);
+    const { isTokenValid, checkToken } = useToken();
 
     useEffect(() => {
-        const checkToken = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                const isValid = await validateToken(token);
-                setIsTokenValid(isValid);
-            }
-        };
         checkToken();
-    }, []);
+    }, [isTokenValid]);
 
     const handleLoginClick = () => {
         setShowLoginPopup(true);
