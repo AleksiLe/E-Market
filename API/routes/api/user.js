@@ -110,7 +110,7 @@ router.post("/change_password", validateToken, async (req, res) => {
         console.log(req);
         const newPassword = req.body.newPassword;
         const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(req.body.password, salt);
+        const hash = bcrypt.hashSync(newPassword, salt);
         req.user.password = hash;
         await req.user.save();
         return res.json({ success: true });
