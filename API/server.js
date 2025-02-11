@@ -15,6 +15,16 @@ app.use(express.json());
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+const cors = require('cors');
+const corsOptions = {
+  origin: [
+    process.env.NEXT_URL,
+    process.env.LOCAL_URL
+  ],
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+app.use(cors(corsOptions));
+
 // Function to set up routes dynamically
 const setupRoutes = (dir, baseUrl) => {
   fs.readdirSync(dir).forEach(file => {
