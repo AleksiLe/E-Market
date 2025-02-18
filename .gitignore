@@ -3,3 +3,4 @@
 API/Dockerfile
 API/.dockerignore
 e-market-450808-22cfa9769988.json
+.vscode/*

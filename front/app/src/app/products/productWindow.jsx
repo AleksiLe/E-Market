@@ -22,7 +22,7 @@ export default function ProductWindow(props) {
     return (
         <div className='flex flex-wrap'>
             {products ? products.map((product) => (
-                <ProductCard key={product._id} name={product.name} description={product.description} />
+                <ProductCard key={product._id} productName={product.name} productDescription={product.description} />
             )) :
             <LoadingAnimation />}
         </div>
