@@ -26,7 +26,7 @@ router.post(
     
             if (existingUser) {
                 return res
-                .status(403)
+                .status(409)
                 .json({ success: false, message: "Email already in use." });
             }
             const salt = bcrypt.genSaltSync(10);
