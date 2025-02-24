@@ -59,14 +59,14 @@ try {
     const user = await User.findOne({ email: req.body.email });
 
     if (!user) {
-    return res.status(403).json({ success: false, message: "Login failed" });
+    return res.status(404).json({ success: false, message: "Login failed" });
     }
 
     if (bcrypt.compareSync(req.body.password, user.password)) {
     const jwtPayload = {
         id: user._id,
         email: user.email,
-    };
+    }
     const token = jwt.sign(
         jwtPayload,
         process.env.JWT_SECRET,
