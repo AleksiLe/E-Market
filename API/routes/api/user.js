@@ -8,7 +8,7 @@ const bcrypt = require("bcrypt");
 const { ValidationError, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 
-// post /api/user - Insert new user
+// post /api/user/register - Insert new user
 router.post(
     "/register",
     validateEmail,
