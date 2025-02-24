@@ -41,7 +41,7 @@ router.post(
             });
             console.log("User registered successfully.");
             return res
-                .status(200)
+                .status(201)
                 .json({ success: true, message: "User registered successfully." });
         
         } catch (error) {
