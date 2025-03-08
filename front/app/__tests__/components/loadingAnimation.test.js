@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import LoadingAnimation from '../src/components/loadingAnimation';
+import LoadingAnimation from '../../src/components/loadingAnimation';
 
 describe('LoadingAnimation', () => {
     it('renders the loading animation with the correct attributes', () => {

@@ -1,12 +1,11 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import ProductCard from '../src/components/productCard';
+import ProductCard from '../../src/components/productCard';
 
 describe('ProductCard', () => {
     it('renders a product card with the correct name and description', () => {
         const productName = 'Test Product';
         const productDescription = 'This is a test product';
-
         render(<ProductCard productName={productName} productDescription={productDescription} />);
 
         expect(screen.getByText(productName)).toBeInTheDocument();
