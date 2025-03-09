@@ -1,11 +1,10 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import Hyperlink from '../../../src/components/navbar/hyperlink';
-import Link from 'next/link';
 
 jest.mock('next/link', () => {
   return ({ children, href, className }) => {
-    return <a href={href} class={className}>{children}</a>;
+    return <a href={href} className={className}>{children}</a>;
   };
 });
 
