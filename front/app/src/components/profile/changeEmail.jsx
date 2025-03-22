@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import postChangeEmail from '@/services/postChangeEmail';
+import PropTypes from 'prop-types';
 
 export default function ChangeEmail({ onClose }) {
     const [email, setEmail] = useState('');
@@ -87,3 +88,6 @@ export default function ChangeEmail({ onClose }) {
         </div>
     );
 }
+ChangeEmail.propTypes = {
+    onClose: PropTypes.func.isRequired,
+};
