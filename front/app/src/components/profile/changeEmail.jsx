@@ -6,10 +6,11 @@ import PropTypes from 'prop-types';
 export default function ChangeEmail({ onClose }) {
     const [email, setEmail] = useState('');
     const [confirmEmail, setConfirmEmail] = useState('');
+    const [message, setMessage] = useState('');
 
     const validateEmail = () => {
-        if (email !== confirmEmail) {
-            alert("Emails do not match.");
+        if (email !== confirmEmail || email.length == 0) {
+            setMessage('Emails do not match.');
             return false;
         }
         return true;
@@ -23,19 +24,20 @@ export default function ChangeEmail({ onClose }) {
 
         const token = window.localStorage.getItem('token');
         if (!token) {
-            alert("You must be logged in to change your email.");
+            setMessage("You must be logged in to change your email.");
             window.location.href = '/';
             return;
         }
 
         const data = await postChangeEmail(token, email);
         if (data.success) {
+            setMessage('Email changed successfully!');
             onClose();
         } else if (data.errors) {
             const messages = data.errors.map((error) => error.path + " : " + error.msg).join("\n");
-            alert(messages);
+            setMessage(messages);
         } else {
-            alert(data.message);
+            setMessage(data.message);
         } 
     };
 
@@ -43,6 +45,7 @@ export default function ChangeEmail({ onClose }) {
         <div className="fixed inset-0 flex items-center justify-center dark:bg-white bg-black bg-opacity-50 dark:bg-opacity-50">
             <div className="bg-white dark:bg-gray-900 p-8 rounded shadow-lg w-96">
                 <h2 className="text-2xl dark:text-white text-black font-bold mb-4">Change Email</h2>
+                {message && <div className="text-red-500 mb-4">{message}</div>}
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block dark:text-white text-black text-sm font-bold mb-2" htmlFor="email">
