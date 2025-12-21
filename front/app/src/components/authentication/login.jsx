@@ -1,33 +1,38 @@
-'use client'
-
-import postLogin from "@/services/postLogin";
-import { useState } from 'react';
-import { useToken } from '@/context/tokenContext';
+import { useState, useActionState, useEffect, useContext  } from 'react';
+import { login } from '@/app/actions/auth';
+import { useRouter } from 'next/navigation';
+import { AuthContext } from '@/context/authContext';
 
 export default function Login({ onClose, onRegisterClick }) {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-    const { checkToken } = useToken();
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const data = await postLogin(email, password);
-        if (data.success) {
-            localStorage.setItem('token', data.token);
-            checkToken();
-            onClose();
-        } else {
-            setErrorMessage(data.message || 'Something went wrong');
+    const [state,  action, pending] = useActionState(login, undefined);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const { refreshAuth } = useContext(AuthContext);
+    useEffect(() => {
+        if (state?.success) {
+            setShowSuccess(true);
+            // Redirect to login after 2 seconds
+            const timer = setTimeout(() => {
+                refreshAuth();
+                onClose();
+            }, 2000);
+            return () => clearTimeout(timer);
         }
-    };
-
+    }, [state?.success]);
     return (
         <div className="fixed inset-0 flex items-center justify-center dark:bg-white bg-black bg-opacity-50 dark:bg-opacity-50">
             <div className="bg-white dark:bg-gray-900 p-8 rounded shadow-lg w-96">
                 <h2 className="text-2xl dark:text-white text-black font-bold mb-4">Login</h2>
-                {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
-                <form onSubmit={handleSubmit}>
+                {showSuccess && (
+                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                        {state?.message}
+                    </div>
+                )}
+                {state?.error?.message && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {state.error.message}
+                    </div>
+                )}
+                <form action={action}>
                     <div className="mb-4">
                         <label className="block dark:text-white text-black text-sm font-bold mb-2" htmlFor="email">
                             Email
@@ -35,11 +40,11 @@ export default function Login({ onClose, onRegisterClick }) {
                         <input
                             type="email"
                             id="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            name="email"
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline"
                         />
                     </div>
+                    {state?.error?.email && <p className="text-red-500">{state.error.email}</p>}
                     <div className="mb-4">
                         <label className="block dark:text-white text-black text-sm font-bold mb-2" htmlFor="password">
                             Password
@@ -47,11 +52,11 @@ export default function Login({ onClose, onRegisterClick }) {
                         <input
                             type="password"
                             id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            name="password"
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline"
                         />
                     </div>
+                    {state?.error?.password && <p className="text-red-500">{state.error.password}</p>}
                     <div className="flex items-center justify-between">
                         <button
                             type="submit"

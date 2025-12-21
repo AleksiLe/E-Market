@@ -10,7 +10,10 @@ export default async function validateToken(token) {
             "Authorization": `Bearer ${token}`
         }
     });
+    if (!response.ok) {
+        return false;
+    }
 
     const data = await response.json();
-    return data.success;
+    return data.success ?? false;
 }

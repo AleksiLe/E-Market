@@ -1,17 +1,18 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import { redirect } from 'next/navigation'
 import ChangePassword from '../../components/profile/changePassword'
 import ChangeEmail from '../../components/profile/changeEmail'
-import { useToken } from '@/context/tokenContext'
+import { clearSession } from '@/app/lib/session';
+import { AuthContext } from '@/context/authContext';
 
 export default function Profile() {
-    const { isTokenValid, checkToken } = useToken();
+    const { isAuthenticated, refreshAuth } = useContext(AuthContext);
     useEffect(() => {
-        checkToken();
-        if (!isTokenValid) {
-            window.location.href = '/';
+        if(!isAuthenticated) {
+            redirect('/');
         }
-    }, [isTokenValid]);
+    }, [isAuthenticated]);
 
     const [showChangePasswordPopup, setShowChangePasswordPopup] = useState(false);
     const [showChangeEmailPopup, setShowChangeEmailPopup] = useState(false);
@@ -32,9 +33,9 @@ export default function Profile() {
         setShowChangePasswordPopup(false);
     };
 
-    const handleLogOutClick = () => {
-        window.localStorage.removeItem('token');
-        window.location.href = '/';
+    const handleLogOutClick =() => {
+        clearSession();
+        refreshAuth();
     };
 
 

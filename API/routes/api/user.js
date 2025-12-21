@@ -54,27 +54,27 @@ router.post(
 );
 
 // post /api/user/login - Login user
-router.post("/login", validateEmail, async (req, res) => {
+router.post("/login", validateEmail, validatePassword, async (req, res) => {
 try {
     const user = await User.findOne({ email: req.body.email });
 
     if (!user) {
-    return res.status(404).json({ success: false, message: "Login failed" });
+        return res.status(404).json({ success: false, message: "User not found" });
     }
 
     if (bcrypt.compareSync(req.body.password, user.password)) {
-    const jwtPayload = {
-        id: user._id,
-        email: user.email,
-    }
-    const token = jwt.sign(
-        jwtPayload,
-        process.env.JWT_SECRET,
-        {
-        expiresIn: "1h",
+        const jwtPayload = {
+            id: user._id,
+            email: user.email,
         }
-    );
-    return res.json({ success: true, token });
+        const token = jwt.sign(
+            jwtPayload,
+            process.env.JWT_SECRET,
+            {
+            expiresIn: "1h",
+            }
+        );
+        return res.json({ success: true, token });
     }
     return res.status(401).json({ success: false, message: "Login failed" });
 } catch (error) {

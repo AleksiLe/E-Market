@@ -1,20 +1,22 @@
 'use client';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import Hyperlink from '@/components/navbar/hyperlink';
 import Login from '@/components/authentication/login';
 import Register from '@/components/authentication/register';
-import { useToken } from '@/context/tokenContext';
+import { useContext } from 'react';
+import { AuthContext } from '@/context/authContext';
 
 export default function Navbar() {
     const pathname = usePathname(); // Call usePathname unconditionally
     const [showLoginPopup, setShowLoginPopup] = useState(false);
-    const [showRegisterPopup, setShowRegisterPopup] = useState(false);
-    const { isTokenValid, checkToken } = useToken();
+    const [showRegisterPopup, setShowRegisterPopup] = useState(false)
+    const { isAuthenticated } = useContext(AuthContext);
+    const [isSessionValid, setIsSessionValid] = useState(false);
 
     useEffect(() => {
-        checkToken();
-    }, [isTokenValid]);
+        // Update local state when context changes
+    }, [isAuthenticated]);
 
     const handleLoginClick = () => {
         setShowLoginPopup(true);
@@ -50,7 +52,7 @@ export default function Navbar() {
                             <Hyperlink path={pathname} address="/about" text="About" />
                         </li>
                         <li>
-                            {isTokenValid ? (
+                            {isAuthenticated ? (
                                 <Hyperlink path={pathname} address="/profile" text="Profile" />
                             ) : (
                                 <button onClick={handleLoginClick} className="text-black dark:text-white hover:text-blue-700">
