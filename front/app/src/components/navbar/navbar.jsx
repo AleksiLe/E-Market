@@ -12,7 +12,7 @@ export default function Navbar() {
     const [showLoginPopup, setShowLoginPopup] = useState(false);
     const [showRegisterPopup, setShowRegisterPopup] = useState(false)
     const { isAuthenticated } = useContext(AuthContext);
-    const [isSessionValid, setIsSessionValid] = useState(false);
+    //const [isSessionValid, setIsSessionValid] = useState(false);
 
     useEffect(() => {
         // Update local state when context changes

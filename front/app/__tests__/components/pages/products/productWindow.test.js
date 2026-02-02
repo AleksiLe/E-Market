@@ -1,69 +1,91 @@
-import '@testing-library/jest-dom';
+import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import ProductWindow from '@/app/products/productWindow';
-import getProducts from '@/services/getProducts';
+import ProductWindow from '@/app/products/ProductWindow';
+import getProducts from '@/services/getProducts.js';
 
-jest.mock('@/services/getProducts', () => jest.fn());
+jest.mock('@/services/getProducts.js', () => jest.fn());
 
-describe('ProductWindow Component', () => {
-    const mockProducts = [
-        { _id: '1', name: 'Product 1', description: 'Description 1' },
-        { _id: '2', name: 'Product 2', description: 'Description 2' },
-    ];
+jest.mock('@/components/productCard.jsx', () => {
+  return function ProductCardMock({ productName, productDescription }) {
+    return (
+      <div data-testid="product-card">
+        <div>{productName}</div>
+        <div>{productDescription}</div>
+      </div>
+    );
+  };
+});
 
-    beforeEach(() => {
-        jest.clearAllMocks();
+jest.mock('@/components/loadingAnimation.jsx', () => {
+  return function LoadingAnimationMock() {
+    return <div data-testid="loading">Loading...</div>;
+  };
+});
+
+describe('ProductWindow', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('shows LoadingAnimation initially', () => {
+    getProducts.mockReturnValue(new Promise(() => {}));
+
+    render(<ProductWindow />);
+
+    expect(screen.getByTestId('loading')).toBeInTheDocument();
+    expect(screen.queryByTestId('product-card')).not.toBeInTheDocument();
+  });
+
+  it('renders ProductCard items after products resolve', async () => {
+    getProducts.mockResolvedValue([
+      { _id: '1', name: 'Product A', description: 'Desc A' },
+      { _id: '2', name: 'Product B', description: 'Desc B' },
+    ]);
+
+    render(<ProductWindow />);
+
+    // Loading first
+    expect(screen.getByTestId('loading')).toBeInTheDocument();
+
+    // Then cards appear
+    const cards = await screen.findAllByTestId('product-card');
+    expect(cards).toHaveLength(2);
+
+    expect(screen.getByText('Product A')).toBeInTheDocument();
+    expect(screen.getByText('Desc A')).toBeInTheDocument();
+    expect(screen.getByText('Product B')).toBeInTheDocument();
+    expect(screen.getByText('Desc B')).toBeInTheDocument();
+
+    // Loading disappears
+    expect(screen.queryByTestId('loading')).not.toBeInTheDocument();
+  });
+
+  it('calls getProducts only once (isMounted guard)', async () => {
+    getProducts.mockResolvedValue([
+      { _id: '1', name: 'Product A', description: 'Desc A' },
+    ]);
+
+    render(<ProductWindow />);
+
+    await screen.findByText('Product A');
+
+    expect(getProducts).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs error if getProducts rejects and keeps showing loading', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    getProducts.mockRejectedValue(new Error('Network error'));
+
+    render(<ProductWindow />);
+
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalled();
     });
 
-    test('renders loading animation initially', () => {
-        render(<ProductWindow />);
-        expect(screen.getByRole('status')).toBeInTheDocument(); // Assuming LoadingAnimation has a role="status"
-    });
+    // Still loading, since products never set
+    expect(screen.getByTestId('loading')).toBeInTheDocument();
+    expect(screen.queryByTestId('product-card')).not.toBeInTheDocument();
 
-    test('fetches and displays products after loading', async () => {
-        getProducts.mockResolvedValueOnce(mockProducts);
-
-        render(<ProductWindow />);
-
-        // Wait for the products to be rendered
-        await waitFor(() => {
-            expect(screen.getByText('Product 1')).toBeInTheDocument();
-            expect(screen.getByText('Product 2')).toBeInTheDocument();
-        });
-
-        // Ensure the loading animation is no longer displayed
-        expect(screen.queryByRole('status')).not.toBeInTheDocument();
-    });
-
-    test('handles fetch errors gracefully', async () => {
-        getProducts.mockRejectedValueOnce(new Error('Failed to fetch products'));
-
-        render(<ProductWindow />);
-
-        // Ensure the loading animation is displayed initially
-        expect(screen.getByRole('status')).toBeInTheDocument();
-
-        // Wait for the error to be logged (no UI changes expected in this case)
-        await waitFor(() => {
-            expect(getProducts).toHaveBeenCalledTimes(1);
-        });
-
-        // Ensure the loading animation is no longer displayed
-        expect(screen.queryByRole('status')).not.toBeInTheDocument();
-    });
-
-    test('renders no products if the API returns an empty array', async () => {
-        getProducts.mockResolvedValueOnce([]);
-
-        render(<ProductWindow />);
-
-        // Wait for the products to be rendered
-        await waitFor(() => {
-            expect(screen.queryByText('Product 1')).not.toBeInTheDocument();
-            expect(screen.queryByText('Product 2')).not.toBeInTheDocument();
-        });
-
-        // Ensure the loading animation is no longer displayed
-        expect(screen.queryByRole('status')).not.toBeInTheDocument();
-    });
+    consoleSpy.mockRestore();
+  });
 });

@@ -6,7 +6,6 @@ export default function Register({ onClose, onLoginClick, onLoginClickFromRegist
     const [showSuccess, setShowSuccess] = useState(false);
 
     useEffect(() => {
-        console.log(state)
         if (state?.success) {
             setShowSuccess(true);
             // Redirect to login after 2 seconds

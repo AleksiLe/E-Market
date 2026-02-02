@@ -1,26 +1,53 @@
 import validateToken from '../../src/services/validateToken';
 
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    json: () => Promise.resolve({ success: true }),
-  })
-);
-
 describe('validateToken', () => {
-  it('validates token successfully', async () => {
-    const token = 'test-token';
-    const isValid = await validateToken(token);
-    expect(isValid).toBe(true);
+  beforeEach(() => {
+    global.fetch = jest.fn();
   });
 
-  it('handles token validation failure', async () => {
-    fetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({ success: false }),
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('returns true when API responds with success', async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+
+    const result = await validateToken('valid-token');
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('user/verify'),
+      expect.objectContaining({
+        method: 'POST',
+        headers: expect.objectContaining({
+          Authorization: 'Bearer valid-token',
+        }),
       })
     );
-    const token = 'invalid-token';
-    const isValid = await validateToken(token);
-    expect(isValid).toBe(false);
+
+    expect(result).toBe(true);
+  });
+
+  it('returns false when response is not ok', async () => {
+    fetch.mockResolvedValueOnce({
+      ok: false,
+    });
+
+    const result = await validateToken('bad-token');
+
+    expect(result).toBe(false);
+  });
+
+  it('returns false when success is missing', async () => {
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({}),
+    });
+
+    const result = await validateToken('token');
+
+    expect(result).toBe(false);
   });
 });

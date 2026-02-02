@@ -1,15 +1,16 @@
-import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import Login from '../../../src/components/authentication/login';
-import postLogin from '../../../src/services/postLogin';
-import { useToken } from '../../../src/context/tokenContext';
+import React from 'react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
+import Login from '@/components/authentication/login'; 
+import { AuthContext } from '@/context/authContext';
 
-// Mock the postLogin service
-jest.mock('../../../src/services/postLogin');
+// mock server action import (not used directly since we mock useActionState)
+jest.mock('@/app/actions/auth', () => ({
+  login: jest.fn(),
+}));
 
-// Mock the useToken hook
-jest.mock('../../../src/context/tokenContext', () => ({
-  useToken: jest.fn(),
+// this component imports useRouter but doesn't use it — still safe to mock
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
 }));
 
 describe('Login', () => {
@@ -17,72 +18,169 @@ describe('Login', () => {
   const onRegisterClick = jest.fn();
 
   beforeEach(() => {
-    useToken.mockReturnValue({
-      checkToken: jest.fn(),
-    });
-    jest.spyOn(Storage.prototype, 'setItem');
+    jest.clearAllMocks();
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.useRealTimers();
+    // Restore useActionState if we spied on it
+    (React.useActionState)?.mockRestore?.();
   });
 
-  it('renders the Login component', () => {
-    render(<Login onClose={onClose} onRegisterClick={onRegisterClick} />);
+  /**
+   * Helper: mock useActionState for this component.
+   * It returns [state, action, pending]
+   */
+  const mockUseActionState = (opts) => {
+    const { state = undefined, pending = false } = opts;
+    const action = jest.fn();
+
+    jest
+      .spyOn(React, 'useActionState')
+      .mockImplementation(() => [state, action, pending]);
+  };
+
+  const renderLogin = (auth) => {
+    const refreshAuth = auth?.refreshAuth ?? jest.fn();
+
+    render(
+      <AuthContext.Provider value={{ refreshAuth }}>
+        <Login onClose={onClose} onRegisterClick={onRegisterClick} />
+      </AuthContext.Provider>
+    );
+
+    return { refreshAuth };
+  };
+
+  it('renders the form fields and buttons', () => {
+    mockUseActionState({ state: undefined, pending: false });
+
+    renderLogin();
+
+    // Title heading
+    expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument();
+
+    // Fields
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
+
+    // Buttons
+    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create an account' })).toBeInTheDocument();
   });
 
-  it('calls postLogin and handles successful login', async () => {
-    postLogin.mockResolvedValue({ success: true, token: 'test-token' });
-    render(<Login onClose={onClose} onRegisterClick={onRegisterClick} />);
+  it('calls onClose when Cancel is clicked', () => {
+    mockUseActionState({ state: undefined, pending: false });
 
-    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'test@example.com' } });
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
-    fireEvent.click(screen.getAllByText('Login')[1]);
+    renderLogin();
 
-    await waitFor(() => {
-      expect(localStorage.setItem).toHaveBeenCalledWith('token', 'test-token');
-      expect(useToken().checkToken).toHaveBeenCalled();
-      expect(onClose).toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onRegisterClick when "Create an account" is clicked', () => {
+    mockUseActionState({ state: undefined, pending: false });
+
+    renderLogin();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create an account' }));
+    expect(onRegisterClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders top-level error message when state.error.message exists', () => {
+    mockUseActionState({
+      state: { error: { message: 'Invalid credentials' } },
+      pending: false,
     });
+
+    renderLogin();
+
+    expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
   });
 
-  it('calls postLogin and handles failed login', async () => {
-    postLogin.mockResolvedValue({ success: false, message: 'Invalid credentials' });
-    render(<Login onClose={onClose} onRegisterClick={onRegisterClick} />);
-
-    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'test@example.com' } });
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
-    fireEvent.click(screen.getAllByText('Login')[1]);
-
-    await waitFor(() => {
-      expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
+  it('renders field errors when present', () => {
+    mockUseActionState({
+      pending: false,
+      state: {
+        error: {
+          email: 'Email is required',
+          password: 'Password is required',
+        },
+      },
     });
+
+    renderLogin();
+
+    expect(screen.getByText('Email is required')).toBeInTheDocument();
+    expect(screen.getByText('Password is required')).toBeInTheDocument();
   });
 
-  it('calls postLogin and returns empty error message', async () => {
-    postLogin.mockResolvedValue({ success: false });
-    render(<Login onClose={onClose} onRegisterClick={onRegisterClick} />);
+  it('shows success message and after 2 seconds calls refreshAuth then onClose', async () => {
+    const refreshAuth = jest.fn();
 
-    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'test@example.com' } });
-    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password' } });
-    fireEvent.click(screen.getAllByText('Login')[1]);
-
-    await waitFor(() => {
-      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+    mockUseActionState({
+      pending: false,
+      state: {
+        success: true,
+        message: 'Login successful!',
+      },
     });
+
+    renderLogin({ refreshAuth });
+
+    // success visible (showSuccess true)
+    expect(screen.getByText('Login successful!')).toBeInTheDocument();
+
+    // not immediately called
+    expect(refreshAuth).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(refreshAuth).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onClose when cancel button is clicked', () => {
-    render(<Login onClose={onClose} onRegisterClick={onRegisterClick} />);
-    fireEvent.click(screen.getByText('Cancel'));
-    expect(onClose).toHaveBeenCalled();
+  it('cleans up timer on unmount (no calls after unmount)', () => {
+    const refreshAuth = jest.fn();
+
+    mockUseActionState({
+      pending: false,
+      state: {
+        success: true,
+        message: 'Login successful!',
+      },
+    });
+
+    const { unmount } = render(
+      <AuthContext.Provider value={{ refreshAuth }}>
+        <Login onClose={onClose} onRegisterClick={onRegisterClick} />
+      </AuthContext.Provider>
+    );
+
+    unmount();
+
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(refreshAuth).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
-  it('calls onRegisterClick when create an account button is clicked', () => {
-    render(<Login onClose={onClose} onRegisterClick={onRegisterClick} />);
-    fireEvent.click(screen.getByText('Create an account'));
-    expect(onRegisterClick).toHaveBeenCalled();
+  it('does not crash if state is undefined', async () => {
+    // sanity: initial state case
+    mockUseActionState({ state: undefined, pending: false });
+
+    renderLogin();
+
+    // still renders basic UI
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument();
+    });
   });
 });

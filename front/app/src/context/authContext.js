@@ -9,9 +9,7 @@ export const AuthProvider = ({ children }) => {
 
     // Function to refresh authentication status
     const refreshAuth = async () => {
-        console.log("Refreshing auth status...");
         const valid = await validateSession();
-        console.log("Session valid:", valid);
         setIsAuthenticated(valid);
     };
 
