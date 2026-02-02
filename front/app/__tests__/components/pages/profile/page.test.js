@@ -1,84 +1,105 @@
-import '@testing-library/jest-dom';
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Profile from '@/app/profile/page';
-import { useToken } from '@/context/tokenContext';
+import Profile from '@/app/profile/page'; 
+import { AuthContext } from '@/context/authContext';
+import { redirect } from 'next/navigation';
+import { clearSession } from '@/app/lib/session';
 
-jest.mock('@/context/tokenContext', () => ({
-    useToken: jest.fn(),
+jest.mock('next/navigation', () => ({
+  redirect: jest.fn(),
 }));
 
-describe('Profile Component', () => {
-    const mockCheckToken = jest.fn();
-    const mockIsTokenValid = true;
+jest.mock('@/app/lib/session', () => ({
+  clearSession: jest.fn(),
+}));
 
-    beforeEach(() => {
-        jest.clearAllMocks();
-        useToken.mockReturnValue({
-            isTokenValid: mockIsTokenValid,
-            checkToken: mockCheckToken,
-        });
-    });
+jest.mock('@/components/profile/changePassword', () => {
+  return function ChangePasswordMock({ onClose }) {
+    return (
+      <div data-testid="change-password">
+        <p>ChangePassword Popup</p>
+        <button onClick={onClose}>Close Change Password</button>
+      </div>
+    );
+  };
+});
 
-    test('renders the profile page correctly', () => {
-        render(<Profile />);
-        expect(screen.getByText('Profile')).toBeInTheDocument();
-        expect(screen.getByText('Welcome to your profile page!')).toBeInTheDocument();
-        expect(screen.getByText('Change Password')).toBeInTheDocument();
-        expect(screen.getByText('Change Email')).toBeInTheDocument();
-        expect(screen.getByText('Log Out')).toBeInTheDocument();
-    });
+jest.mock('@/components/profile/changeEmail', () => {
+  return function ChangeEmailMock({ onClose }) {
+    return (
+      <div data-testid="change-email">
+        <p>ChangeEmail Popup</p>
+        <button onClick={onClose}>Close Change Email</button>
+      </div>
+    );
+  };
+});
 
-     test('calls checkToken on mount', () => {
-        render(<Profile />);
-        expect(mockCheckToken).toHaveBeenCalled();
-    });
+const renderProfile = (opts) => {
+  const refreshAuth = jest.fn();
 
-    test('redirects to home if token is invalid', () => {
-        useToken.mockReturnValue({
-            isTokenValid: false,
-            checkToken: mockCheckToken,
-        });
-        delete window.location;
-        window.location = { href: '' };
+  render(
+    <AuthContext.Provider value={{ isAuthenticated: opts.isAuthenticated, refreshAuth }}>
+      <Profile />
+    </AuthContext.Provider>
+  );
 
-        render(<Profile />);
-        expect(window.location.href).toBe('/');
-    });
+  return { refreshAuth };
+};
 
-    test('shows ChangePassword component when "Change Password" button is clicked', () => {
-        render(<Profile />);
-        fireEvent.click(screen.getByText('Change Password'));
-        expect(screen.getByText('New Password')).toBeInTheDocument();
-    });
+describe('Profile', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    test('hides ChangePassword component when onClose is triggered', () => {
-        render(<Profile />);
-        fireEvent.click(screen.getByText('Change Password'));
-        expect(screen.getByText('New Password')).toBeInTheDocument();
-        fireEvent.click(screen.getAllByText('Cancel')[0]);
-        expect(screen.queryByText('New Password')).not.toBeInTheDocument();
-    });
+  it('redirects to "/" when not authenticated', () => {
+    renderProfile({ isAuthenticated: false });
 
-    test('shows ChangeEmail component when "Change Email" button is clicked', () => {
-        render(<Profile />);
-        fireEvent.click(screen.getByText('Change Email'));
-        expect(screen.getByText('New Email')).toBeInTheDocument();
-    });
+    expect(redirect).toHaveBeenCalledTimes(1);
+    expect(redirect).toHaveBeenCalledWith('/');
+  });
 
-    test('hides ChangeEmail component when onClose is triggered', () => {
-        render(<Profile />);
-        fireEvent.click(screen.getByText('Change Email'));
-        expect(screen.getByText('New Email')).toBeInTheDocument();
-        fireEvent.click(screen.getAllByText('Cancel')[0]);
-        expect(screen.queryByText('New Email')).not.toBeInTheDocument();
-    });
-    test('logs out and redirects to home when "Log Out" button is clicked', () => {
-        delete window.location;
-        window.location = { href: '' };
+  it('renders profile page when authenticated', () => {
+    renderProfile({ isAuthenticated: true });
 
-        render(<Profile />);
-        fireEvent.click(screen.getByText('Log Out'));
-        expect(window.localStorage.getItem('token')).toBeNull();
-        expect(window.location.href).toBe('/');
-    }); 
+    expect(screen.getByRole('heading', { name: 'Profile' })).toBeInTheDocument();
+    expect(screen.getByText('Welcome to your profile page!')).toBeInTheDocument();
+
+    expect(screen.getByRole('button', { name: 'Change Password' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Change Email' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Log Out' })).toBeInTheDocument();
+  });
+
+  it('opens and closes Change Password popup', () => {
+    renderProfile({ isAuthenticated: true });
+
+    expect(screen.queryByTestId('change-password')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Change Password' }));
+    expect(screen.getByTestId('change-password')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close Change Password' }));
+    expect(screen.queryByTestId('change-password')).not.toBeInTheDocument();
+  });
+
+  it('opens and closes Change Email popup', () => {
+    renderProfile({ isAuthenticated: true });
+
+    expect(screen.queryByTestId('change-email')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Change Email' }));
+    expect(screen.getByTestId('change-email')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close Change Email' }));
+    expect(screen.queryByTestId('change-email')).not.toBeInTheDocument();
+  });
+
+  it('logs out by clearing session and refreshing auth', () => {
+    const { refreshAuth } = renderProfile({ isAuthenticated: true });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Log Out' }));
+
+    expect(clearSession).toHaveBeenCalledTimes(1);
+    expect(refreshAuth).toHaveBeenCalledTimes(1);
+  });
 });

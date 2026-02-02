@@ -1,10 +1,16 @@
-import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import Product from '@/app/products/page';
+import Products from '@/app/products/page';
 
-describe('Product Component', () => {
-    test('renders the product page correctly', () => {
-        render(<Product />);
-        expect(screen.getByRole('status')).toBeInTheDocument();
-    });
+jest.mock('@/app/products/productWindow', () => {
+  return function ProductWindowMock() {
+    return <div data-testid="product-window">ProductWindow</div>;
+  };
+});
+
+describe('Products page', () => {
+  it('renders ProductWindow', () => {
+    render(<Products />);
+
+    expect(screen.getByTestId('product-window')).toBeInTheDocument();
+  });
 });

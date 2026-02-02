@@ -24,6 +24,11 @@ export default function Home() {
         setShowRegisterPopup(false);
     };
 
+    const handleLoginClickFromRegister = () => {
+        setShowRegisterPopup(false);
+        setShowLoginPopup(true);
+    }
+
     return (
         <div className="p-10 sm:p-40">
             <h1 className="text-4xl m-2 font-bold text-center">Shopping made simple for everyone</h1>
@@ -37,7 +42,7 @@ export default function Home() {
                 </button>
             </div>
             {showLoginPopup && <Login onClose={handleCloseLoginPopup} onRegisterClick={handleRegisterClick} />}
-            {showRegisterPopup && <Register onClose={handleCloseRegisterPopup} onLoginClick={handleLoginClick} />}
+            {showRegisterPopup && <Register onClose={handleCloseRegisterPopup} onLoginClick={handleLoginClick} onLoginClickFromRegister={handleLoginClickFromRegister} />}
         </div>
     );
 }
