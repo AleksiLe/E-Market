@@ -63,13 +63,6 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CFDA96EAD0564DE5B2179B39E6659BC6 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B715E2E55322455988C83865B261DF68 }}
 
-      - name: Debug publishing profile fetch
-        run: |
-          set -e
-          az webapp deployment list-publishing-profiles \
-            -g EMarketSystem \
-            -n EMarketSystemAPI \
-            --query "[0].publishingUserName" -o tsv
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -79,4 +72,5 @@ jobs:
           slot-name: 'Production'
           package: .
           
+
 
