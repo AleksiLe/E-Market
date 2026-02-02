@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
-import ProductWindow from '@/app/products/ProductWindow';
+import ProductWindow from '@/app/products/productWindow';
 import getProducts from '@/services/getProducts.js';
 
 jest.mock('@/services/getProducts.js', () => jest.fn());
