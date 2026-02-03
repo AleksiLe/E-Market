@@ -1,5 +1,6 @@
 # E-Market
 Web marketplace with its own mobile app, website, and an Azure-hosted backend.
+Azure is currently unavailable with a free resource plan. Going to migrate when I have time.
 <br>URL: https://emarketfront-eyepc4h9h8c2bmft.northeurope-01.azurewebsites.net/
 ## Roadmap
 
