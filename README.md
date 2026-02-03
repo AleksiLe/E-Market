@@ -1,7 +1,7 @@
 # E-Market
-Web marketplace with its own mobile app, website, and an Azure-hosted backend.
-Azure is currently unavailable with a free resource plan. Going to migrate when I have time.
-<br>URL: https://emarketfront-eyepc4h9h8c2bmft.northeurope-01.azurewebsites.net/
+Web marketplace with its own mobile app, website  and backend.
+Currently hosted in AWS (Only web front, I migrate API and DB later), as Azure won't keep my free tier services up. 
+<br>URL: [https://em-a46647faee444c138ad10725f0a0562f.ecs.eu-north-1.on.aws/]
 ## Roadmap
 
 ### 0.5 Code quality and improvements
@@ -24,7 +24,7 @@ Goal to version 0.4 is to deploy mobile app.
 Features:
  - Route for products
  - Mongo database cluster at Azure Cosmos DB
- - Azure-hosted website
+ - AWS-hosted website
  - CI/CD pipeline for api
  - Container deployed front
  - Users
