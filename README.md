@@ -1,7 +1,6 @@
 # E-Market
-Web marketplace with its own mobile app, website  and backend.
-Currently hosted in AWS (Only web front, I migrate API and DB later), as Azure won't keep my free tier services up. 
-<br>URL: [https://em-a46647faee444c138ad10725f0a0562f.ecs.eu-north-1.on.aws/]
+Web marketplace with its own mobile app, website  and backend. Azure hosted  
+<br>URL: [Link to frontpage](https://emarketfront-eyepc4h9h8c2bmft.northeurope-01.azurewebsites.net/)
 ## Roadmap
 
 ### 0.5 Code quality and improvements
