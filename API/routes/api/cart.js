@@ -2,13 +2,14 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 const { validateToken } = require("../../auth/validateToken");
+const { type } = require('os');
 
 // get /api/cart/getCartItems
 router.get('/getCartItems', validateToken, (req, res) => {
     const cartItems = req.user.cart || {};
     res.json({
         success: true,
-        cartItems: Array.from(cartItems.entries()).map(([productId, quantity]) => ({
+        cartItems: Object.entries(cartItems).map(([productId, quantity]) => ({
             productId,
             quantity
         }))
@@ -18,7 +19,6 @@ router.get('/getCartItems', validateToken, (req, res) => {
 // post /api/cart/updateCart
 router.post('/updateCart', validateToken, async (req, res) => {
     const { productId, quantity } = req.body;
-    console.log("Received updateCart request:", { productId, quantity });
     if (!productId || typeof quantity !== 'number') {
         return res.status(400).json({ success: false, message: 'Invalid input' });
     }
