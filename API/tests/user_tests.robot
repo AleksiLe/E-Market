@@ -3,7 +3,7 @@ Library  RequestsLibrary
 Library  JSONLibrary
 
 *** Variables ***
-${BASE_URL}  http://localhost:3000/api
+${BASE_URL}  http://localhost:5000/api
 ${token}  None
 
 *** Test Cases ***
