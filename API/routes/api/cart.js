@@ -41,11 +41,47 @@ router.post('/updateCart', validateToken, async (req, res) => {
             Object.entries(items).filter(([_, quantity]) => typeof quantity === 'number' && quantity > 0)
         );
 
+        if (!cart.items || cart.items.size === 0) {
+            await cart.deleteOne();
+            req.user.cart = undefined;
+            await req.user.save();
+
+            return res.json({ success: true, message: "Empty cart deleted" });
+        }
+
         await cart.save();
         return res.json({ success: true, cart: Object.fromEntries(cart.items) });
 
     } catch (error) {
         console.error(`Error updating cart for user ${req.user._id}:`, error);
+        return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+});
+
+// delete /api/cart/deleteCart
+router.delete('/deleteCart', validateToken, async (req, res) => {
+    try {
+        if (!req.user.cart) {
+            return res.json({ success: true, message: "There was no cart on user" }); //Could log this
+        }
+
+        const cart = await Cart.findById(req.user.cart);
+
+        if (!cart) {
+            req.user.cart = undefined;
+            await req.user.save();
+            return res.json({ success: true, message: "Cart not found but reference cleared" }); //Could log this happening
+        }
+
+        await cart.deleteOne();
+
+        req.user.cart = undefined;
+        await req.user.save();
+
+        return res.json({ success: true, message: "Cart deleted" });
+
+    } catch (error) {
+        console.error(`Error deleting cart for user ${req.user._id}:`, error);
         return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
 });

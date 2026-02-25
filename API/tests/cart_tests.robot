@@ -42,9 +42,18 @@ Update Cart - Add Item
     ${cart}=      Get Value From Json    ${response.json()}    $.cart
     Should Be Equal  ${cart}[0]  ${data}
 
+Update Cart - Remove Item
+    [Documentation]  Remove a product from the cart by setting quantity to 0 and expect cart deletion
+    Create Session  api_session  ${BASE_URL}  headers={"Authorization": "Bearer ${token}[0]"}
+    ${quantity}     Evaluate    0
+    &{data}=  Create Dictionary  ${product_id}=${quantity}
+    ${response}=  POST On Session  api_session  /cart/updateCart  json=${data}
+    Should Be Equal As Numbers  ${response.status_code}  200
+    ${message}=  Get Value From Json  ${response.json()}  $.message
+    Should Be Equal As Strings  ${message}  ['Empty cart deleted']
 
-Update Cart - Update Item Quantity
-    [Documentation]  Update quantity of an existing product
+Update Cart - Add Item After Remove Item
+    [Documentation]  Add a product to the cart again
     Create Session  api_session  ${BASE_URL}  headers={"Authorization": "Bearer ${token}[0]"}
     ${quantity}     Evaluate    5
     &{data}=  Create Dictionary  ${product_id}=${quantity}
@@ -53,12 +62,22 @@ Update Cart - Update Item Quantity
     ${cart}=  Get Value From Json  ${response.json()}  $..cart
     Should Be Equal  ${cart}[0]  ${data}
 
-Update Cart - Remove Item
-    [Documentation]  Remove a product from the cart by setting quantity to 0
+Delete Cart - Cart is empty
+    [Documentation]  Remove the cart from user
     Create Session  api_session  ${BASE_URL}  headers={"Authorization": "Bearer ${token}[0]"}
-    ${quantity}     Evaluate    0
-    &{data}=  Create Dictionary  ${product_id}=${quantity}
-    ${response}=  POST On Session  api_session  /cart/updateCart  json=${data}
-    Should Be Equal As Numbers  ${response.status_code}  200
-    ${cart}=  Get Value From Json  ${response.json()}  $.cart
-    Should Be Equal As Strings   ${cart}   [{}]
+    ${response}=  DELETE On Session  api_session  /cart/deleteCart 
+    ${message}=  Get Value From Json  ${response.json()}  $..message
+    Should Be Equal As Strings  ${message}  ['Cart deleted']
+
+Delete Cart - Cart Not Found
+    [Documentation]  Remove the cart from user
+    Create Session  api_session  ${BASE_URL}  headers={"Authorization": "Bearer ${token}[0]"}
+    ${response}=  DELETE On Session  api_session  /cart/deleteCart  
+    ${message}=  Get Value From Json  ${response.json()}  $..message
+    Should Be Equal As Strings  ${message}  ['There was no cart on user']
+
+Delete Cart - No User Token
+    [Documentation]  Handle the missing token
+    Create Session    api_session    ${BASE_URL}
+    ${response}=      DELETE On Session    api_session    /cart/deleteCart    expected_status=401
+    Should Be Equal As Numbers    ${response.status_code}    401
