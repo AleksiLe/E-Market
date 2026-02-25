@@ -128,4 +128,16 @@ router.post("/verify", validateToken, (req, res) => {
     }
 });
 
+// delete /api/user/delete - Delete current user
+router.delete("/delete", validateToken, async (req, res) => {
+    try {
+        // Delete the user from the database
+        await User.findByIdAndDelete(req.user._id);
+        return res.json({ success: true, message: "User deleted successfully." });
+    } catch (error) {
+        console.error(`Error during user deletion: ${error}`);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
 module.exports = router;
