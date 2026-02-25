@@ -63,3 +63,10 @@ Verify Token
     Create Session  api_session  ${BASE_URL}  headers={"Authorization": "Bearer ${token}[0]"}
     ${response}=  POST On Session  api_session  /user/verify
     Should Be Equal As Numbers  ${response.status_code}  200
+
+Delete Test Account With Token
+    [Documentation]    Verify that you can delete an account
+    Log    ${token}
+    Create Session    api_session    ${BASE_URL}    headers={"Authorization": "Bearer ${token}[0]"}
+    ${response}=    Delete On Session    api_session    /user/delete
+    Should Be Equal As Numbers    ${response.status_code}    200
